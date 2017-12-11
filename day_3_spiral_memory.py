@@ -19,7 +19,7 @@ def allocate_memory(n):
         down: (right, down),
         up: (left, up),
     }
-    memory = {(0, 0): 1, (0, 1): 2}
+    memory = {(0, 0): 1, (0, 1): 1}
     prev_move = right
     position = (0, 1)
     number = 2
@@ -28,16 +28,35 @@ def allocate_memory(n):
         for move in possible_moves:
             new_position = (position[0] + move[0], position[1] + move[1])
             if new_position not in memory:
-                number += 1
+                number = next_number(new_position, memory)
                 memory[new_position] = number
                 prev_move = move
                 position = new_position
                 break
-    return position
+    return memory
 
 
 def dist(x, y):
     return abs(x) + abs(y)
+
+
+def next_number(position, memory):
+    return sum(memory.get(n, 0) for n in neighbours(position))
+
+
+
+def neighbours(point):
+    x, y = point
+    return {
+        (x, y+1),
+        (x, y-1),
+        (x+1, y),
+        (x-1, y),
+        (x+1, y+1),
+        (x+1, y-1),
+        (x-1, y-1),
+        (x-1, y+1),
+            }
 
 
 class TestSpiralMemory(unittest.TestCase):
@@ -54,5 +73,5 @@ class TestSpiralMemory(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print(dist(*allocate_memory(325489)))
-    unittest.main()
+    #unittest.main()
+    print(allocate_memory(325490))
