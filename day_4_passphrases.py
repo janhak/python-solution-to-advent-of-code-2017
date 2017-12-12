@@ -19,11 +19,21 @@ def passphrases_from_file(a_file):
             yield line
 
 
-def is_passphrase_valid(passphrase):
+def passphrase_valid_unique_words(passphrase):
+    """Valid if no two words are identical"""
     words = passphrase.split()
     all_words = len(words)
     uniqe_words = len(set(words))
     return all_words == uniqe_words
+
+
+def passphrase_valid(passphrase):
+    """Valid if no two words in the passphrase are anagrams."""
+    words = passphrase.split()
+    no_anagrams = set(frozenset(word) for word in words)
+    all_words = len(words)
+    words_with_no_anagrams = len(no_anagrams)
+    return all_words == words_with_no_anagrams
 
 
 class TestPassphraseValidator(unittest.TestCase):
@@ -35,10 +45,10 @@ class TestPassphraseValidator(unittest.TestCase):
             )
         for p, valid in phrases:
             with self.subTest(phrase=p, valid=valid):
-                self.assertEqual(is_passphrase_valid(p), valid)
+                self.assertEqual(passphrase_valid_unique_words(p), valid)
 
 
 if __name__ == '__main__':
     phrases = passphrases_from_file('day_4_passphrases.txt')
-    valid_pp = sum(1 for pp in phrases if is_passphrase_valid(pp))
+    valid_pp = sum(1 for pp in phrases if passphrase_valid(pp))
     print('Valid passphrases: ', valid_pp)
