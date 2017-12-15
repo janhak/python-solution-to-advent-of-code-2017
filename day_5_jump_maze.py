@@ -44,21 +44,25 @@ import unittest
 
 
 class Interrupt:
-    def __init__(self, instructions):
+    def __init__(self, instructions, part_two=False):
         self.instructions = instructions
         self.position = 0
         self.jumps = 0
+        self.part_two = part_two
 
     def jump(self):
         """Carry out the next jump instruction."""
         jump_by = self.instructions[self.position]
-        self.increase_offset()
+        self.change_offset()
         self.position += jump_by
         self.jumps += 1
 
-    def increase_offset(self):
-        """Increase the jump offset at the current position by one."""
-        self.instructions[self.position] += 1
+    def change_offset(self):
+        """Adjust the jump offset at the current position."""
+        offset = 1
+        if self.part_two and self.instructions[self.position] >= 3:
+            offset = -1
+        self.instructions[self.position] += offset
 
     @property
     def escaped(self):
@@ -112,5 +116,5 @@ if __name__ == '__main__':
     # unittest.main()
     maze = read_maze_txt('day_5_maze.txt')
     instructions = list(maze)
-    int_ = Interrupt(instructions)
+    int_ = Interrupt(instructions, part_two=True)
     print(int_.escape_maze())
