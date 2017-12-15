@@ -52,9 +52,9 @@ import unittest
 class MemoryReallocator:
     def __init__(self, memory):
         self.memory = memory
-        self.memory_snapshots = set()
+        self.cycles = 0
+        self.memory_snapshots = {}
         self.record_memory()
-        self._cycle = 0
 
     @property
     def largest_bank(self):
@@ -68,7 +68,7 @@ class MemoryReallocator:
         largest_bank = self.largest_bank
         to_distribute = self.empty_bank(largest_bank)
         self.reallocate_from(largest_bank, to_distribute)
-        self._cycle += 1
+        self.cycles += 1
         self.record_memory()
 
     def reallocate_from(self, bank, blocks):
@@ -93,9 +93,11 @@ class MemoryReallocator:
     def record_memory(self):
         to_record = tuple(self.memory)
         if to_record in self.memory_snapshots:
-            raise RecursionError(
-                "Infinite loop detected after %s cycles" % self._cycle)
-        self.memory_snapshots.add(to_record)
+            first_seen = self.memory_snapshots[to_record]
+            size_of_loop = self.cycles - first_seen
+            raise RecursionError("Infinite loop of size %s detected after %s cycles" %
+                                 (size_of_loop, self.cycles))
+        self.memory_snapshots.update({to_record: self.cycles})
 
 
 class TestMemoryReallocator(unittest.TestCase):
