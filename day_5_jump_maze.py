@@ -75,6 +75,12 @@ class Interrupt:
         return self.jumps
 
 
+def read_maze_txt(a_file):
+    with open(a_file, 'rt') as f:
+        for line in f:
+            yield int(line)
+
+
 class TestTrampolineMaze(unittest.TestCase):
     def test_interrupt_starts_at_zero(self):
         interrupt = Interrupt([0])
@@ -103,4 +109,8 @@ class TestTrampolineMaze(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    # unittest.main()
+    maze = read_maze_txt('day_5_maze.txt')
+    instructions = list(maze)
+    int_ = Interrupt(instructions)
+    print(int_.escape_maze())
