@@ -83,11 +83,14 @@ class TestParsers(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    #unittest.main()
+    # unittest.main()
+    temp_values = set()
     lines = lines_from_file('day_8_data.txt')
     for l in lines:
         reg, change, condition = parse_line(l)
-        print(reg, change, condition)
         if eval(condition):
             MEMORY[reg] += change
+            temp_values.add(MEMORY[reg])
+
     print('Maximum value', max(MEMORY.values()))
+    print('Maximum value during execution', max(temp_values))
