@@ -101,6 +101,7 @@ class Node:
         self.weight = weight
         self.parent = parent
         self.children = list(children) if children else []
+        self._total_weight = 0
 
     def link_children(self, node_map):
         children = [node_map[name] for name in self.children]
@@ -113,6 +114,40 @@ class Node:
                 f' weight={self.weight!r},'
                 f' children={[c.name for c in self.children]})')
 
+    @property
+    def total_weight(self):
+        if self._total_weight:
+            return self._total_weight
+        total_weight = self.weight
+        for child in self.children:
+            total_weight += child.total_weight
+        self._total_weight = total_weight
+        return self._total_weight
+
+    def different_child(self):
+        weight_to_compare = self.children[0].total_weight
+        lighter_nodes = [c for c in self.children if c.total_weight <= weight_to_compare]
+        heavier_nodes = [c for c in self.children if c.total_weight > weight_to_compare]
+        if len(heavier_nodes) == 1:
+            return heavier_nodes[0]
+        elif len(lighter_nodes) == 1:
+            return lighter_nodes[0]
+        else:
+            assert False, 'This is not possible if one program is to be balanced'
+
+    @property
+    def balanced(self):
+        if not self.children:
+            return True
+        first_child_weight = self.children[0].total_weight
+        return all(c.total_weight == first_child_weight for c in self.children)
+
+
+def find_imbalanced_node(current_node):
+    if current_node.balanced:
+        return current_node
+    return find_imbalanced_node(current_node.different_child())
+
 
 if __name__ == '__main__':
     lines = yield_lines('day_7_data.txt')
@@ -121,4 +156,8 @@ if __name__ == '__main__':
     for node in node_map.values():
         node.link_children(node_map)
     root = next(filter(lambda x: x.parent is None, node_map.values()))
-    print(root)
+    imbalanced_node = find_imbalanced_node(root)
+    print(imbalanced_node)
+    parent = imbalanced_node.parent
+    for c in parent.children:
+        print(c.name, c.total_weight, c.weight)
