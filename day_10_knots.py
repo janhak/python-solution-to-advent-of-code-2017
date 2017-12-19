@@ -77,7 +77,8 @@ class KnotHash:
 
     def hash(self):
         for length in self.lenghts:
-            self.reverse_section(length)
+            if length > 1:
+                self.reverse_section(length)
             self.update_pos(step=length)
             self.update_step()
         return self.knot
@@ -132,12 +133,12 @@ class TestKnotHash(unittest.TestCase):
         knot = KnotHash(5, lenghts)
         expected = [3, 4, 2, 1, 0]
         self.assertEqual(knot.hash(), expected)
-
+        self.assertEqual(knot.skip_step, 4)
 
 if __name__ == '__main__':
-    unittest.main()
+    # unittest.main()
     input_list = [
         212, 254, 178, 237, 2, 0, 1, 54, 167, 92, 117, 125, 255, 61, 159, 164
     ]
-    result = KnotHash(255, input_list).hash()
+    result = KnotHash(256, input_list).hash()
     print(result[0] * result[1])
