@@ -65,6 +65,8 @@ However, you should instead use the standard list size of 256 (with values 0 to
 complete, what is the result of multiplying the first two numbers in the list?
 """
 import unittest
+import operator
+from functools import reduce
 
 
 class KnotHash:
@@ -113,6 +115,20 @@ class KnotHash:
         self.skip_step += 1
 
 
+def input_from_bytes(byte_str):
+    ascii_encoded = [ord(x) for x in byte_str]
+    suffix = [17, 31, 73, 47, 23]
+    return ascii_encoded + suffix
+
+
+def dense_hash(sparse_hash, block_size=16):
+    blocks = (sparse_hash[x:x + block_size]
+              for x in range(0, len(sparse_hash), block_size))
+    xored_blocks = (reduce(operator.xor, block) for block in blocks)
+    hexed_blocks = ('{:02x}'.format(block) for block in xored_blocks)
+    return ''.join(hexed_blocks)
+
+
 class TestKnotHash(unittest.TestCase):
     def test_same_list_with_no_lengths(self):
         knot = KnotHash(256, [])
@@ -135,10 +151,12 @@ class TestKnotHash(unittest.TestCase):
         self.assertEqual(knot.hash(), expected)
         self.assertEqual(knot.skip_step, 4)
 
+
 if __name__ == '__main__':
-    # unittest.main()
-    input_list = [
-        212, 254, 178, 237, 2, 0, 1, 54, 167, 92, 117, 125, 255, 61, 159, 164
-    ]
-    result = KnotHash(256, input_list).hash()
-    print(result[0] * result[1])
+    # get input
+    raw_input = '212,254,178,237,2,0,1,54,167,92,117,125,255,61,159,164'
+    input_list = input_from_bytes(raw_input)
+    knot = KnotHash(256, input_list)
+    for _ in range(64):
+        knot.hash()
+    print(dense_hash(knot.knot))
