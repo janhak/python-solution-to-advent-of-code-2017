@@ -72,6 +72,13 @@ def process_headings(headings, start=ORIGIN):
     return pos
 
 
+def distance_from_headings(headings, start=ORIGIN):
+    pos = start
+    for heading in headings:
+        pos += MOVE[heading]
+        yield pos.distance_from_origin
+
+
 def headings_from_file(a_file):
     with open(a_file, 'rt') as f:
         raw_line = f.readline()
@@ -82,3 +89,6 @@ if __name__ == '__main__':
     headings = headings_from_file('day_11_data.txt')
     pos = process_headings(headings)
     print('Final position', pos, 'distance:', pos.distance_from_origin)
+    # Part 2
+    furthest_ever = max(distance_from_headings(headings))
+    print('Furthest I got away from origin was', furthest_ever)
