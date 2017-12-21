@@ -81,4 +81,6 @@ if __name__ == '__main__':
     for l in lines:
         for origin, dest in connections_from_line(l):
             union(origin, dest)
-    print(sum(1 for c in connections if c == connections[0]))
+    print('First program is connected to ',
+          sum(1 for c in connections if c == connections[0]))
+    print('There are {} groups'.format(len(set(connections))))
