@@ -189,22 +189,7 @@ is 0*3 + 6*4 = 24.
 Given the details of the firewall you've recorded, if you leave immediately,
 what is the severity of your whole trip?
 """
-
-
-class Layer:
-    def __init__(self, depth, layer_range):
-        self.depth = depth
-        self.layer_range = layer_range
-
-    def blocks(self, time):
-        return time % (2 * (self.layer_range - 1)) == 0
-
-    @property
-    def severity(self):
-        return self.depth * self.layer_range
-
-    def __repr__(self):
-        return 'Layer({}, {})'.format(self.depth, self.layer_range)
+import itertools
 
 
 def lines_from_file(a_file):
@@ -220,32 +205,20 @@ def parse_line(line):
 
 
 def firewall_from_file(a_file):
-    """
-    Creates a firewall represented by a dict where keys correspond to
-    active layers at a given depth.
-    """
     lines = lines_from_file(a_file)
     layers = (parse_line(l) for l in lines)
-    firewall = {d: Layer(d, r) for d, r in layers}
-    return firewall
+    return {d: r for d, r in layers}
 
 
-def trip_severity(firewall):
-    time = 0
-    total_severity = 0
-    while firewall:
-        next_layer = firewall.pop(time, None)
-        try:
-            if next_layer.blocks(time):
-                total_severity += next_layer.severity
-                print('Blocked at {} picoseconds by {}'
-                      .format(time, next_layer))
-        except AttributeError:
-            pass
-        time += 1
-    return total_severity
+def scanner(layer_range, time):
+    offset = time % (2 * (layer_range - 1))
+    return 2 * (layer_range - 1) - offset if offset > layer_range - 1 else offset
 
 
 if __name__ == '__main__':
     f = firewall_from_file('day_13_data.txt')
-    print('Total trip severity:', trip_severity(f))
+    severity = sum(pos * f[pos] for pos in f if scanner(f[pos], pos) == 0)
+    print('Total trip severity:', severity)
+    min_wait = next(delay for delay in itertools.count()
+                    if not any(scanner(f[pos], delay + pos) == 0 for pos in f))
+    print('Minimum delay not to get caught:', min_wait)
