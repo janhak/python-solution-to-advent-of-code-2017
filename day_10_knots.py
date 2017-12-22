@@ -77,12 +77,13 @@ class KnotHash:
         self.pos = 0
         self.skip_step = 0
 
-    def hash(self):
-        for length in self.lenghts:
-            if length > 1:
-                self.reverse_section(length)
-            self.update_pos(step=length)
-            self.update_step()
+    def hash(self, times=64):
+        for _ in range(times):
+            for length in self.lenghts:
+                if length > 1:
+                    self.reverse_section(length)
+                self.update_pos(step=length)
+                self.update_step()
         return self.knot
 
     def reverse_section(self, length):
@@ -129,6 +130,14 @@ def dense_hash(sparse_hash, block_size=16):
     return ''.join(hexed_blocks)
 
 
+def binary_hash(sparse_hash, block_size=16):
+    blocks = (sparse_hash[x:x + block_size]
+              for x in range(0, len(sparse_hash), block_size))
+    xored_blocks = (reduce(operator.xor, block) for block in blocks)
+    bin_blocks = ('{:08b}'.format(block) for block in xored_blocks)
+    return ''.join(bin_blocks)
+
+
 class TestKnotHash(unittest.TestCase):
     def test_same_list_with_no_lengths(self):
         knot = KnotHash(256, [])
@@ -156,6 +165,4 @@ if __name__ == '__main__':
     raw_input = '212,254,178,237,2,0,1,54,167,92,117,125,255,61,159,164'
     input_list = input_from_bytes(raw_input)
     knot = KnotHash(256, input_list)
-    for _ in range(64):
-        knot.hash()
-    print(dense_hash(knot.knot))
+    print(dense_hash(knot.hash()))
