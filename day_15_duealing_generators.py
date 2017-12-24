@@ -9,7 +9,6 @@ class Generator:
                  divisor=2147483647,
                  as_bin=True,
                  multiple=None):
-        self.seed = seed
         self.factor = factor
         self.divisor = divisor
         self._prev = self.seed
