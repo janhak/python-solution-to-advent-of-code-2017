@@ -16,25 +16,16 @@ def spin(line_up, n):
 
 
 def dance(line_up, instructions):
-    for i in instructions:
-        if i[0] == 's':
-            instr_type = spin
-            arguments = [int(i[1:])]
-        elif i[0] == 'x':
-            instr_type = exchange
-            arguments = map(int, i[1:].split('/'))
-        elif i[0] == 'p':
-            instr_type = partner
-            arguments = i[1:].split('/')
-        print(i, instr_type, arguments)
-        line_up = instr_type(line_up, *arguments)
+    for raw_instr in instructions:
+        instruction, arguments = INSTRUCTIONS[raw_instr[0]]
+        line_up = instruction(line_up, *arguments(raw_instr))
     return ''.join(line_up)
 
 
 INSTRUCTIONS = {
-    's': spin,
-    'x': exchange,
-    'p': partner,
+    's': (spin, lambda x: [int(x[1:])]),
+    'x': (exchange, lambda x: map(int, x[1:].split('/'))),
+    'p': (partner, lambda x: x[1:].split('/')),
 }
 
 
@@ -62,4 +53,4 @@ if __name__ == '__main__':
     # unittest.main()
     inst = instructions_from_file('day_16_data.txt')
     line_up = list(string.ascii_lowercase[:16])
-    print(dance(line_up, inst))
+    print('Final order', dance(line_up, inst))
