@@ -15,10 +15,16 @@ def spin(line_up, n):
     return line_up[-n:] + line_up[:-n]
 
 
-def dance(line_up, instructions):
-    for raw_instr in instructions:
-        instruction, arguments = INSTRUCTIONS[raw_instr[0]]
-        line_up = instruction(line_up, *arguments(raw_instr))
+def dance(line_up, instructions, times=1):
+    seen = []
+    for i in range(times):
+        s = ''.join(line_up)
+        if s in seen:
+            return seen[times % i]
+        seen.append(s)
+        for raw_instr in instructions:
+            instruction, arguments = INSTRUCTIONS[raw_instr[0]]
+            line_up = instruction(line_up, *arguments(raw_instr))
     return ''.join(line_up)
 
 
@@ -53,4 +59,5 @@ if __name__ == '__main__':
     # unittest.main()
     inst = instructions_from_file('day_16_data.txt')
     line_up = list(string.ascii_lowercase[:16])
-    print('Final order', dance(line_up, inst))
+    answer = dance(line_up, inst, times=1000000000)
+    print(answer)
