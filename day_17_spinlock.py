@@ -56,13 +56,13 @@ would be 638.
 What is the value after 2017 in your completed circular buffer?
 """
 import unittest
+from collections import deque
 
 
 class SpinLock:
     def __init__(self, step):
-        self._buffer = [0]
+        self._buffer = deque([0])
         self.step = step
-        self.pos = 0
         self.value = 1
 
     def __len__(self):
@@ -70,10 +70,8 @@ class SpinLock:
 
     def spin(self, times=1):
         for _ in range(times):
-            step = self.step % len(self)
-            self.pos = (self.pos + step) % len(self)
-            self._buffer.insert(self.pos + 1, self.value)
-            self.pos += 1
+            self._buffer.rotate(-self.step)
+            self._buffer.append(self.value)
             self.value += 1
 
     def value_after_zero(self):
@@ -85,18 +83,16 @@ class TestSpinLock(unittest.TestCase):
     def test_add_single_value_to_spin_lock(self):
         s = SpinLock(step=3)
         s.spin()
-        self.assertEqual(s._buffer, [0, 1])
+        self.assertEqual(s.value_after_zero(), 1)
 
     def test_spin_three_times(self):
         s = SpinLock(step=3)
         s.spin(times=3)
-        self.assertEqual(s._buffer, [0, 2, 3, 1])
-        self.assertEqual(s.pos, 2)
+        self.assertEqual(s.value_after_zero(), 2)
 
 
 if __name__ == '__main__':
     # unittest.main()
     s = SpinLock(step=382)
-    s.spin(times=2017)
-    print('Value after last insertion', s._buffer[s.pos + 1])
+    s.spin(times=50000000)
     print('Value after 0', s.value_after_zero())
