@@ -107,5 +107,5 @@ if __name__ == '__main__':
     lines = open('day_19_data.txt', 'rt').readlines()
     labyrinth = labyrinth_from_lines(lines)
     path = walk_labyrinth((0, 15), labyrinth)
-    print(path)
+    print('Path taken is', path[0], 'steps taken', path[1])
     unittest.main()
