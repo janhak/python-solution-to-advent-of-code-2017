@@ -49,3 +49,85 @@ Which particle will stay closest to position <0,0,0> in the long term?
 
 To begin, get your puzzle input.
 """
+import re
+import unittest
+
+
+class Vector:
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def __repr__(self):
+        return 'Vector({}, {}, {})'.format(self.x, self.y, self.z)
+
+    def __add__(self, other):
+        return Vector(self.x + other.x, self.y + other.y, self.z + other.z)
+
+
+class Particle:
+    def __init__(self, pos, vel, acc, p_id=None):
+        self.pos = pos
+        self.vel = vel
+        self.acc = acc
+        self.p_id = p_id
+
+    def update(self):
+        self.vel += self.acc
+        self.pos += self.vel
+
+    @classmethod
+    def from_line(cls, line, p_id=None):
+        groups = re.findall(r'<([-0-9,]+)>', line)
+        coordinates = (map(int, group.split(',')) for group in groups)
+        vectors = (Vector(*xyz) for xyz in coordinates)
+        return Particle(*vectors, p_id=p_id)
+
+    def __repr__(self):
+        return 'Particle_{}({}, {}, {})'.format(self.p_id, self.pos, self.vel,
+                                                self.acc)
+
+    @property
+    def distance(self):
+        return sum(map(abs, (self.pos.x, self.pos.y, self.pos.z)))
+
+
+class TestParticleSwarm(unittest.TestCase):
+    def setUp(self):
+        l = 'p=<1918,-2104,2938>, v=<18,101,-32>, a=<-13,2,-14>'
+        self.p = Particle.from_line(l)
+
+    def test_parse_line(self):
+        self.assertEqual(self.p.pos.x, 1918)
+        self.assertEqual(self.p.vel.y, 101)
+        self.assertEqual(self.p.acc.z, -14)
+
+    def test_particle_distance(self):
+        self.assertEqual(self.p.distance, 6960)
+
+    def test_particle_update(self):
+        self.p.update()
+        self.assertEqual(self.p.distance, 6816)
+
+
+def simulate_swarm(updates=1000):
+    lines = open('day_20_data.txt', 'rt').readlines()
+    particles = [Particle.from_line(l, p_id=i) for i, l in enumerate(lines)]
+    for _ in range(updates):
+        for p in particles:
+            p.update()
+    particles.sort(key=lambda x: x.distance)
+    print(*particles[0:5], sep='\n')
+    print()
+    particles = particles[0:20]
+    for _ in range(updates*10):
+        for p in particles:
+            p.update()
+    particles.sort(key=lambda x: x.distance)
+    print(*particles[0:5], sep='\n')
+
+
+if __name__ == '__main__':
+    simulate_swarm()
+    unittest.main()
