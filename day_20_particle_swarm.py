@@ -65,6 +65,12 @@ class Vector:
     def __add__(self, other):
         return Vector(self.x + other.x, self.y + other.y, self.z + other.z)
 
+    def __eq__(self, other):
+        return all((self.x == other.x, self.y == other.y, self.z == other.z))
+
+    def __hash__(self):
+        return hash((self.x, self.y, self.z))
+
 
 class Particle:
     def __init__(self, pos, vel, acc, p_id=None):
@@ -85,8 +91,8 @@ class Particle:
         return Particle(*vectors, p_id=p_id)
 
     def __repr__(self):
-        return 'Particle_{}({}, {}, {})'.format(self.p_id, self.pos, self.vel,
-                                                self.acc)
+        return 'Particle({}, {}, {}, id={})'.format(self.pos, self.vel,
+                                                    self.acc, self.p_id)
 
     @property
     def distance(self):
@@ -110,24 +116,48 @@ class TestParticleSwarm(unittest.TestCase):
         self.p.update()
         self.assertEqual(self.p.distance, 6816)
 
+    def test_filter_collissions(self):
+        lines = [
+            'p=<1918,-2104,2938>, v=<18,101,-32>, a=<-13,2,-14>',
+            'p=<1918,-2104,2938>, v=<18,101,-32>, a=<-13,2,-14>',
+            'p=<1918,-2104,2938>, v=<18,101,-32>, a=<-13,2,-14>',
+            'p=<1900,-2104,2938>, v=<18,101,-32>, a=<-13,2,-14>',
+            'p=<1900,-2104,2938>, v=<18,101,-32>, a=<-13,2,-14>',
+            'p=<1901,-2104,2938>, v=<18,101,-32>, a=<-13,2,-14>',
+        ]
+        particles = [
+            Particle.from_line(l, p_id=i) for i, l in enumerate(lines)
+        ]
+        filtered = filter_collissions(particles)
+        self.assertEqual(len(filtered), 1)
 
-def simulate_swarm(updates=1000):
+
+def filter_collissions(particles):
+    coordinates_seen = {}
+    p_id_to_remove = set()
+    for p in particles:
+        try:
+            to_remove = coordinates_seen[p.pos]
+            p_id_to_remove.add(to_remove)
+            p_id_to_remove.add(p.p_id)
+        except KeyError:
+            coordinates_seen[p.pos] = p.p_id
+    return [p for p in particles if p.p_id not in p_id_to_remove]
+
+
+def simulate_swarm(updates=3000, collisions=False):
     lines = open('day_20_data.txt', 'rt').readlines()
     particles = [Particle.from_line(l, p_id=i) for i, l in enumerate(lines)]
     for _ in range(updates):
         for p in particles:
             p.update()
+        if collisions:
+            particles = filter_collissions(particles)
     particles.sort(key=lambda x: x.distance)
     print(*particles[0:5], sep='\n')
-    print()
-    particles = particles[0:20]
-    for _ in range(updates*10):
-        for p in particles:
-            p.update()
-    particles.sort(key=lambda x: x.distance)
-    print(*particles[0:5], sep='\n')
+    print('Particles left', len(particles))
 
 
 if __name__ == '__main__':
-    simulate_swarm()
+    simulate_swarm(collisions=True)
     unittest.main()
