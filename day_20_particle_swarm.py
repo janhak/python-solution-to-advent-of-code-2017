@@ -125,9 +125,8 @@ class TestParticleSwarm(unittest.TestCase):
             'p=<1900,-2104,2938>, v=<18,101,-32>, a=<-13,2,-14>',
             'p=<1901,-2104,2938>, v=<18,101,-32>, a=<-13,2,-14>',
         ]
-        particles = [
-            Particle.from_line(l, p_id=i) for i, l in enumerate(lines)
-        ]
+        particles = [Particle.from_line(l, p_id=i)
+                     for i, l in enumerate(lines)]
         filtered = filter_collissions(particles)
         self.assertEqual(len(filtered), 1)
 
