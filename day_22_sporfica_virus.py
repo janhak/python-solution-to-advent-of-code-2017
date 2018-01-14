@@ -111,3 +111,109 @@ infection.
 Given your actual map, after 10000 bursts of activity, how many bursts cause a
 node to become infected? (Do not count nodes that begin infected.)
 """
+import collections
+import unittest
+
+CLEAN = '.'
+INFECTED = '#'
+
+
+class Virus:
+    directions = ['UP', 'RIGHT', 'DOWN', 'LEFT']
+    direction_to_move = {
+        'UP': (-1, 0),
+        'RIGHT': (0, 1),
+        'DOWN': (1, 0),
+        'LEFT': (0, -1)
+    }
+
+    def __init__(self, grid, start, facing='UP'):
+        self.grid = grid
+        self.x, self.y = start
+        self._facing = self.directions.index(facing)
+        self.infected = 0
+
+    def turn_right(self):
+        self._facing = (self._facing + 1) % len(self.directions)
+
+    def turn_left(self):
+        self._facing = (self._facing - 1) % len(self.directions)
+
+    @property
+    def facing(self):
+        return self.directions[self._facing]
+
+    @property
+    def pos(self):
+        return (self.x, self.y)
+
+    def burst(self):
+        # turn
+        if self.grid[self.pos] == INFECTED:
+            self.turn_right()
+        else:
+            self.turn_left()
+        # infect
+        if self.grid[self.pos] == CLEAN:
+            self.grid[self.pos] = INFECTED
+            self.infected += 1
+        else:
+            self.grid[self.pos] = CLEAN
+        # move
+        move = self.direction_to_move[self.facing]
+        self.x += move[0]
+        self.y += move[1]
+
+
+class TestVirus(unittest.TestCase):
+    def setUp(self):
+        grid = grid_from_lines(('..#', '#..', '...'))
+        self.v = Virus(grid, (1, 1))
+
+    def test_turning(self):
+        self.assertEqual(self.v.facing, 'UP')
+        self.v.turn_right()
+        self.assertEqual(self.v.facing, 'RIGHT')
+        self.v.turn_right()
+        self.assertEqual(self.v.facing, 'DOWN')
+        self.v.turn_right()
+        self.assertEqual(self.v.facing, 'LEFT')
+        self.v.turn_right()
+        self.assertEqual(self.v.facing, 'UP')
+
+    def test_infecting(self):
+        self.assertEqual(self.v.pos, (1, 1))
+        self.v.burst()
+        self.assertEqual(self.v.pos, (1, 0))
+        self.assertEqual(self.v.facing, 'LEFT')
+        self.assertEqual(self.v.infected, 1)
+        self.v.burst()
+        self.assertEqual(self.v.facing, 'UP')
+        self.assertEqual(self.v.pos, (0, 0))
+        self.assertEqual(self.v.infected, 1)
+        self.v.burst()
+        self.assertEqual(self.v.facing, 'LEFT')
+        self.assertEqual(self.v.pos, (0, -1))
+        self.assertEqual(self.v.infected, 2)
+        for _ in range(4):
+            self.v.burst()
+        self.assertEqual(self.v.infected, 5)
+
+
+def grid_from_lines(lines):
+    grid = collections.defaultdict(lambda: CLEAN)
+    for i, line in enumerate(lines):
+        for j, cell in enumerate(line.strip()):
+            grid[(i, j)] = cell
+    return grid
+
+
+if __name__ == '__main__':
+    lines = open('day_22_data.txt', 'rt').readlines()
+    grid = grid_from_lines(lines)
+    start = (len(lines) // 2, len(lines) // 2)
+    v = Virus(grid, start)
+    for _ in range(10000):
+        v.burst()
+    print('After 10000 bursts virus infected', v.infected)
+    unittest.main()
