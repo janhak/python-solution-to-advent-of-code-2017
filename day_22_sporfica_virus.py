@@ -112,12 +112,15 @@ Given your actual map, after 10000 bursts of activity, how many bursts cause a
 node to become infected? (Do not count nodes that begin infected.)
 """
 import collections
+from enum import Enum
 import unittest
 
-CLEAN = '.'
-INFECTED = '#'
-WEAKENED = 'W'
-FLAGGED = 'F'
+
+class State(Enum):
+    CLEAN = 1
+    WEAKENED = 2
+    INFECTED = 3
+    FLAGGED = 4
 
 
 class Virus:
@@ -155,11 +158,11 @@ class Virus:
 
     def burst(self):
         # turn
-        if self.grid[self.pos] == INFECTED:
+        if self.grid[self.pos] == State.INFECTED:
             self.turn_right()
-        elif self.grid[self.pos] == CLEAN:
+        elif self.grid[self.pos] == State.CLEAN:
             self.turn_left()
-        elif self.grid[self.pos] == FLAGGED:
+        elif self.grid[self.pos] == State.FLAGGED:
             self.reverse()
         self.infect()
         # move
@@ -169,15 +172,15 @@ class Virus:
 
     def infect(self):
         # infect
-        if self.grid[self.pos] == CLEAN:
-            self.grid[self.pos] = WEAKENED
-        elif self.grid[self.pos] == WEAKENED:
-            self.grid[self.pos] = INFECTED
+        if self.grid[self.pos] == State.CLEAN:
+            self.grid[self.pos] = State.WEAKENED
+        elif self.grid[self.pos] == State.WEAKENED:
+            self.grid[self.pos] = State.INFECTED
             self.infected += 1
-        elif self.grid[self.pos] == INFECTED:
-            self.grid[self.pos] = FLAGGED
-        elif self.grid[self.pos] == FLAGGED:
-            self.grid[self.pos] = CLEAN
+        elif self.grid[self.pos] == State.INFECTED:
+            self.grid[self.pos] = State.FLAGGED
+        elif self.grid[self.pos] == State.FLAGGED:
+            self.grid[self.pos] = State.CLEAN
 
 
 class TestVirus(unittest.TestCase):
@@ -227,20 +230,20 @@ class TestVirus(unittest.TestCase):
 
 
 def grid_from_lines(lines):
-    grid = collections.defaultdict(lambda: CLEAN)
+    grid = collections.defaultdict(lambda: State.CLEAN)
     for i, line in enumerate(lines):
         for j, cell in enumerate(line.strip()):
-            grid[(i, j)] = cell
+            grid[(i, j)] = State.CLEAN if cell == '.' else State.INFECTED
     return grid
 
 
 if __name__ == '__main__':
-    lines = open('day_22_data.txt', 'rt').readlines()
-    grid = grid_from_lines(lines)
-    start = (len(lines) // 2, len(lines) // 2)
-    v = Virus(grid, start)
-    bursts = 10000000
-    for _ in range(bursts):
-        v.burst()
-    print('After {} bursts virus infected'.format(bursts), v.infected)
     unittest.main()
+    # lines = open('day_22_data.txt', 'rt').readlines()
+    # grid = grid_from_lines(lines)
+    # start = (len(lines) // 2, len(lines) // 2)
+    # v = Virus(grid, start)
+    # bursts = 10000000
+    # for _ in range(bursts):
+    #     v.burst()
+    # print('After {} bursts virus infected'.format(bursts), v.infected)
