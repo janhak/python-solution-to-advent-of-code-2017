@@ -116,6 +116,8 @@ import unittest
 
 CLEAN = '.'
 INFECTED = '#'
+WEAKENED = 'W'
+FLAGGED = 'F'
 
 
 class Virus:
@@ -139,6 +141,10 @@ class Virus:
     def turn_left(self):
         self._facing = (self._facing - 1) % len(self.directions)
 
+    def reverse(self):
+        self.turn_right()
+        self.turn_right()
+
     @property
     def facing(self):
         return self.directions[self._facing]
@@ -151,18 +157,27 @@ class Virus:
         # turn
         if self.grid[self.pos] == INFECTED:
             self.turn_right()
-        else:
+        elif self.grid[self.pos] == CLEAN:
             self.turn_left()
-        # infect
-        if self.grid[self.pos] == CLEAN:
-            self.grid[self.pos] = INFECTED
-            self.infected += 1
-        else:
-            self.grid[self.pos] = CLEAN
+        elif self.grid[self.pos] == FLAGGED:
+            self.reverse()
+        self.infect()
         # move
         move = self.direction_to_move[self.facing]
         self.x += move[0]
         self.y += move[1]
+
+    def infect(self):
+        # infect
+        if self.grid[self.pos] == CLEAN:
+            self.grid[self.pos] = WEAKENED
+        elif self.grid[self.pos] == WEAKENED:
+            self.grid[self.pos] = INFECTED
+            self.infected += 1
+        elif self.grid[self.pos] == INFECTED:
+            self.grid[self.pos] = FLAGGED
+        elif self.grid[self.pos] == FLAGGED:
+            self.grid[self.pos] = CLEAN
 
 
 class TestVirus(unittest.TestCase):
@@ -181,23 +196,34 @@ class TestVirus(unittest.TestCase):
         self.v.turn_right()
         self.assertEqual(self.v.facing, 'UP')
 
+    def test_reversing(self):
+        self.assertEqual(self.v.facing, 'UP')
+        self.v.reverse()
+        self.assertEqual(self.v.facing, 'DOWN')
+        self.v.reverse()
+        self.assertEqual(self.v.facing, 'UP')
+
     def test_infecting(self):
         self.assertEqual(self.v.pos, (1, 1))
         self.v.burst()
         self.assertEqual(self.v.pos, (1, 0))
         self.assertEqual(self.v.facing, 'LEFT')
-        self.assertEqual(self.v.infected, 1)
+        self.assertEqual(self.v.infected, 0)
         self.v.burst()
         self.assertEqual(self.v.facing, 'UP')
         self.assertEqual(self.v.pos, (0, 0))
-        self.assertEqual(self.v.infected, 1)
+        self.assertEqual(self.v.infected, 0)
         self.v.burst()
         self.assertEqual(self.v.facing, 'LEFT')
         self.assertEqual(self.v.pos, (0, -1))
-        self.assertEqual(self.v.infected, 2)
-        for _ in range(4):
+        self.assertEqual(self.v.infected, 0)
+        for _ in range(2):
             self.v.burst()
-        self.assertEqual(self.v.infected, 5)
+        self.assertEqual(self.v.pos, (1, 0))
+        self.assertEqual(self.v.infected, 0)
+        for _ in range(95):
+            self.v.burst()
+        self.assertEqual(self.v.infected, 26)
 
 
 def grid_from_lines(lines):
@@ -213,7 +239,8 @@ if __name__ == '__main__':
     grid = grid_from_lines(lines)
     start = (len(lines) // 2, len(lines) // 2)
     v = Virus(grid, start)
-    for _ in range(10000):
+    bursts = 10000000
+    for _ in range(bursts):
         v.burst()
-    print('After 10000 bursts virus infected', v.infected)
+    print('After {} bursts virus infected'.format(bursts), v.infected)
     unittest.main()
