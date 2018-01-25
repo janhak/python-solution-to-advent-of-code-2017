@@ -239,11 +239,11 @@ def grid_from_lines(lines):
 
 if __name__ == '__main__':
     unittest.main()
-    # lines = open('day_22_data.txt', 'rt').readlines()
-    # grid = grid_from_lines(lines)
-    # start = (len(lines) // 2, len(lines) // 2)
-    # v = Virus(grid, start)
-    # bursts = 10000000
-    # for _ in range(bursts):
-    #     v.burst()
-    # print('After {} bursts virus infected'.format(bursts), v.infected)
+    lines = open('day_22_data.txt', 'rt').readlines()
+    grid = grid_from_lines(lines)
+    start = (len(lines) // 2, len(lines) // 2)
+    v = Virus(grid, start)
+    bursts = 100
+    for _ in range(bursts):
+        v.burst()
+    print('After {} bursts virus infected'.format(bursts), v.infected)
