@@ -36,44 +36,46 @@ def line_to_instruction(line):
     return inst, args
 
 
-class Runner:
+class Processor:
     def __init__(self, instructions):
         self.mem = defaultdict(int)
         self.mul_invoked = 0
         self.inst = list(instructions)
         self.next_inst = 0
 
-    def set(self, x, y):
-        self.mem[x] = self.reg_or_value(y)
-        self.next_inst += 1
-
-    def sub(self, x, y):
-        self.mem[x] -= self.reg_or_value(y)
-        self.next_inst += 1
-
-    def mul(self, x, y):
-        self.mem[x] *= self.reg_or_value(y)
-        self.mul_invoked += 1
-        self.next_inst += 1
-
-    def jnz(self, x, y):
-        self.next_inst += y if self.reg_or_value(x) != 0 else 1
-
-    def reg_or_value(self, x):
+    def __getitem__(self, x):
         if isinstance(x, int):
             return x
         else:
             return self.mem[x]
 
+    def __setitem__(self, x, y):
+        self.mem[x] = y
+
+    def op_set(self, x, y):
+        self[x] = self[y]
+
+    def op_sub(self, x, y):
+        self[x] -= self[y]
+
+    def op_mul(self, x, y):
+        self[x] *= self[y]
+        self.mul_invoked += 1
+
+    def op_jnz(self, x, y):
+        if self[x] != 0:
+            return self[y]
+
     def execute(self):
         while self.next_inst in range(0, len(self.inst)):
             inst, args = self.inst[self.next_inst]
-            getattr(self, inst)(*args)
+            delta = getattr(self, 'op_%s' % inst)(*args)
+            self.next_inst += delta if delta is not None else 1
 
 
 if __name__ == '__main__':
     lines = open('day_23_data.txt', 'rt').readlines()
     instructions = (line_to_instruction(l) for l in lines)
-    runner = Runner(instructions)
+    runner = Processor(instructions)
     runner.execute()
     print('Multiplication invoked:', runner.mul_invoked)
