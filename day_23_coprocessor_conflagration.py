@@ -73,9 +73,20 @@ class Processor:
             self.next_inst += delta if delta is not None else 1
 
 
+def second_part():
+    h = 0
+    for b in range(109300, 126301, 17):
+        for d in range(2, b):
+            if b % d == 0:
+                h += 1
+                break
+    return h
+
+
 if __name__ == '__main__':
     lines = open('day_23_data.txt', 'rt').readlines()
     instructions = (line_to_instruction(l) for l in lines)
     runner = Processor(instructions)
     runner.execute()
     print('Multiplication invoked:', runner.mul_invoked)
+    print('Second part, h is:', second_part())
