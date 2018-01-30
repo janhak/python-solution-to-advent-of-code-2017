@@ -58,3 +58,41 @@ Of these bridges, the strongest one is 0/1--10/1--9/10; it has a strength of
 What is the strength of the strongest bridge you can make with the components
 you have available?
 """
+
+
+def read_components(lines):
+    return [tuple(map(int, line.strip().split('/'))) for line in lines]
+
+
+def bridges(components, so_far=()):
+    last_comp = so_far[-1] if so_far else (0, 0)
+    for i, comp in enumerate(components):
+        use_comp = None
+        if comp[0] == last_comp[1]:
+            use_comp = comp
+        elif comp[1] == last_comp[1]:
+            use_comp = comp[::-1]
+        if use_comp:
+            bridge = so_far + (use_comp, )
+            yield bridge
+            yield from bridges(components[:i] + components[i + 1:], bridge)
+
+
+def strentgh(bridge):
+    return sum(sum(comp) for comp in bridge)
+
+
+def longest_strongest_bridge(components):
+    return max(bridges(components), key=lambda b: (len(b), strentgh(b)))
+
+
+def strongest_bridge(components):
+    return max(bridges(components), key=strentgh)
+
+
+if __name__ == '__main__':
+    components = read_components(open('day_24_data.txt', 'rt').readlines())
+    strongest = strentgh(strongest_bridge(components))
+    print('Strongest bridge:', strongest)
+    strongest_l = strentgh(longest_strongest_bridge(components))
+    print('Strongest longest bridge:', strongest_l)
