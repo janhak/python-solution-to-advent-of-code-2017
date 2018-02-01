@@ -87,3 +87,80 @@ example, the diagnostic checksum is 3.
 Recreate the Turing machine and save the computer! What is the diagnostic
 checksum it produces once it's working again?
 """
+from collections import defaultdict
+
+
+class StateMachine:
+    def __init__(self):
+        self.tape = defaultdict(int)
+        self.state = State(self.tape)
+
+    def run_instruction(self, no=1):
+        for _ in range(1, no + 1):
+            self.state.action()
+
+    @property
+    def checksum(self):
+        return sum(v for v in self.tape.values())
+
+
+class State:
+    def __init__(self, tape):
+        self.new_state(State_A)
+        self.tape = tape
+        self.pos = 0
+
+    def new_state(self, state):
+        self.__class__ = state
+
+    def action(self):
+        if self.current_value == 0:
+            return self.act_zero()
+        elif self.current_value == 1:
+            return self.act_one()
+
+    def act_zero(self):
+        raise NotImplementedError()
+
+    def act_one(self):
+        raise NotImplementedError()
+
+    @property
+    def current_value(self):
+        return self.tape[self.pos]
+
+    def __repr__(self):
+        return '{}(pos={})'.format(self.__class__.__name__, self.pos)
+
+
+class State_A(State):
+    def act_zero(self):
+        self.tape[self.pos] = 1
+        self.pos += 1
+        self.new_state(State_B)
+
+    def act_one(self):
+        self.tape[self.pos] = 0
+        self.pos -= 1
+        self.new_state(State_B)
+
+
+class State_B(State):
+    def act_zero(self):
+        self.tape[self.pos] = 1
+        self.pos -= 1
+        self.new_state(State_A)
+
+    def act_one(self):
+        self.tape[self.pos] = 1
+        self.pos += 1
+        self.new_state(State_A)
+
+
+if __name__ == '__main__':
+    machine = StateMachine()
+    machine.run_instruction(no=6)
+    print('After 6 instructions:')
+    print('Checksum', machine.checksum)
+    print('State', machine.state)
+    print('Tape', machine.tape)
