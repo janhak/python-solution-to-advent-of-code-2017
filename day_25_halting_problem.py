@@ -214,29 +214,6 @@ class State_F(State):
         self.new_state(State_A)
 
 
-# Example State Machine
-# class State_A(State):
-#     def act_zero(self):
-#         self.tape[self.pos] = 1
-#         self.pos += 1
-#         self.new_state(State_B)
-
-#     def act_one(self):
-#         self.tape[self.pos] = 0
-#         self.pos -= 1
-#         self.new_state(State_B)
-
-# class State_B(State):
-#     def act_zero(self):
-#         self.tape[self.pos] = 1
-#         self.pos -= 1
-#         self.new_state(State_A)
-
-#     def act_one(self):
-#         self.tape[self.pos] = 1
-#         self.pos += 1
-#         self.new_state(State_A)
-
 if __name__ == '__main__':
     machine = StateMachine()
     machine.run_instruction(no=12919244)
