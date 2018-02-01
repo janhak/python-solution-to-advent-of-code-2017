@@ -49,6 +49,6 @@ class TestPassphraseValidator(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    phrases = passphrases_from_file('day_4_passphrases.txt')
+    phrases = passphrases_from_file('day_04_passphrases.txt')
     valid_pp = sum(1 for pp in phrases if passphrase_valid(pp))
     print('Valid passphrases: ', valid_pp)
