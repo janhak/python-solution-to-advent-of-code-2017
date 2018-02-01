@@ -125,6 +125,15 @@ class State:
     def act_one(self):
         raise NotImplementedError()
 
+    def move_left(self):
+        self.pos -= 1
+
+    def move_right(self):
+        self.pos += 1
+
+    def write(self, value):
+        self.tape[self.pos] = value
+
     @property
     def current_value(self):
         return self.tape[self.pos]
@@ -135,32 +144,102 @@ class State:
 
 class State_A(State):
     def act_zero(self):
-        self.tape[self.pos] = 1
-        self.pos += 1
+        self.write(1)
+        self.move_right()
         self.new_state(State_B)
 
     def act_one(self):
-        self.tape[self.pos] = 0
-        self.pos -= 1
-        self.new_state(State_B)
+        self.write(0)
+        self.move_left()
+        self.new_state(State_C)
 
 
 class State_B(State):
     def act_zero(self):
-        self.tape[self.pos] = 1
-        self.pos -= 1
+        self.write(1)
+        self.move_left()
         self.new_state(State_A)
 
     def act_one(self):
-        self.tape[self.pos] = 1
-        self.pos += 1
+        self.write(1)
+        self.move_right()
+        self.new_state(State_D)
+
+
+class State_C(State):
+    def act_zero(self):
+        self.write(1)
+        self.move_right()
+        self.new_state(State_A)
+
+    def act_one(self):
+        self.write(0)
+        self.move_left()
+        self.new_state(State_E)
+
+
+class State_D(State):
+    def act_zero(self):
+        self.write(1)
+        self.move_right()
+        self.new_state(State_A)
+
+    def act_one(self):
+        self.write(0)
+        self.move_right()
+        self.new_state(State_B)
+
+
+class State_E(State):
+    def act_zero(self):
+        self.write(1)
+        self.move_left()
+        self.new_state(State_F)
+
+    def act_one(self):
+        self.write(1)
+        self.move_left()
+        self.new_state(State_C)
+
+
+class State_F(State):
+    def act_zero(self):
+        self.write(1)
+        self.move_right()
+        self.new_state(State_D)
+
+    def act_one(self):
+        self.write(1)
+        self.move_right()
         self.new_state(State_A)
 
 
+# Example State Machine
+# class State_A(State):
+#     def act_zero(self):
+#         self.tape[self.pos] = 1
+#         self.pos += 1
+#         self.new_state(State_B)
+
+#     def act_one(self):
+#         self.tape[self.pos] = 0
+#         self.pos -= 1
+#         self.new_state(State_B)
+
+# class State_B(State):
+#     def act_zero(self):
+#         self.tape[self.pos] = 1
+#         self.pos -= 1
+#         self.new_state(State_A)
+
+#     def act_one(self):
+#         self.tape[self.pos] = 1
+#         self.pos += 1
+#         self.new_state(State_A)
+
 if __name__ == '__main__':
     machine = StateMachine()
-    machine.run_instruction(no=6)
-    print('After 6 instructions:')
+    machine.run_instruction(no=12919244)
+    print('After 12919244 instructions:')
     print('Checksum', machine.checksum)
     print('State', machine.state)
-    print('Tape', machine.tape)
