@@ -85,7 +85,7 @@ class TestParsers(unittest.TestCase):
 if __name__ == '__main__':
     # unittest.main()
     temp_values = set()
-    lines = lines_from_file('day_8_data.txt')
+    lines = lines_from_file('day_08_data.txt')
     for l in lines:
         reg, change, condition = parse_line(l)
         if eval(condition):

@@ -142,4 +142,4 @@ class TestStreamProcessor(unittest.TestCase):
 
 if __name__ == '__main__':
     # unittest.main()
-    print(clean_and_score(read_stream('day_9_data.txt')))
+    print(clean_and_score(read_stream('day_09_data.txt')))

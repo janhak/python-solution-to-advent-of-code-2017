@@ -150,7 +150,7 @@ def find_imbalanced_node(current_node):
 
 
 if __name__ == '__main__':
-    lines = yield_lines('day_7_data.txt')
+    lines = yield_lines('day_07_data.txt')
     nodes = (parse_line(l) for l in lines)
     node_map = {node.name: node for node in nodes}
     for node in node_map.values():

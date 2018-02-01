@@ -113,7 +113,7 @@ class TestTrampolineMaze(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    maze = read_maze_txt('day_5_maze.txt')
+    maze = read_maze_txt('day_05_maze.txt')
     instructions = list(maze)
     int_ = Interrupt(instructions, part_two=True)
     print(int_.escape_maze())
